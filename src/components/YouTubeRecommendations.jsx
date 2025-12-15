@@ -26,12 +26,12 @@ function YouTubeRecommendations({ symptom }) {
     >
       <div className="relative">
         <img
-          src={v.thumbnail || "/src/assets/arogya-logo.jpeg"}
+          src={v.thumbnail || "/youtube-logo.jpg"}
           alt={v.title || "Wellness video"}
           className="w-full h-40 object-cover"
           onError={(e) => {
-            if (e.currentTarget.src !== "/src/assets/arogya-logo.jpeg") {
-              e.currentTarget.src = "/src/assets/arogya-logo.jpeg";
+            if (e.currentTarget.src !== "/youtube-logo.jpg") {
+              e.currentTarget.src = "/youtube-logo.jpg";
             }
           }}
         />
@@ -116,8 +116,8 @@ function YouTubeRecommendations({ symptom }) {
             alt="Arogya"
             className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl object-cover border-2 border-emerald-200 shadow-sm"
             onError={(e) => {
-              if (e.currentTarget.src !== "/src/assets/arogya-logo.jpeg")
-                e.currentTarget.src = "/src/assets/arogya-logo.jpeg";
+              if (e.currentTarget.src !== "/youtube-logo.jpg")
+                e.currentTarget.src = "/youtube-logo.jpg";
             }}
           />
           <div className="leading-tight">
