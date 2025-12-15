@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import HomePage from "./components/HomePage.jsx";
@@ -13,15 +14,47 @@ function AppShell() {
   const [showLandingPage, setShowLandingPage] = useState(true);
   const navigate = useNavigate();
 
+  // ---- load from localStorage on first mount ----
   useEffect(() => {
     document.title = "Arogya Wellness Assistant";
+
+    const saved = localStorage.getItem("arogya_user");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed?.user_id) {
+          setUserId(parsed.user_id);
+          setUserName(parsed.full_name || "");
+          setProfileCompleted(!!parsed.profileCompleted);
+          setShowLandingPage(false);
+        }
+      } catch {
+        // ignore parse error
+      }
+    }
   }, []);
+
+  const persistUser = (uid, name, profileDone = false) => {
+    localStorage.setItem(
+      "arogya_user",
+      JSON.stringify({
+        user_id: uid,
+        full_name: name || "",
+        profileCompleted: profileDone,
+      })
+    );
+  };
+
+  const clearUser = () => {
+    localStorage.removeItem("arogya_user");
+  };
 
   const handleLogout = () => {
     setUserId("");
     setUserName("");
     setProfileCompleted(false);
     setShowLandingPage(true);
+    clearUser();
     navigate("/");
   };
 
@@ -71,6 +104,7 @@ function AppShell() {
                 setUserName(name);
                 setProfileCompleted(false);
                 setShowLandingPage(false);
+                persistUser(uid, name, false);
                 navigate("/profile");
               }}
               onBackClick={() => {
@@ -98,6 +132,7 @@ function AppShell() {
                 setUserName(name);
                 setProfileCompleted(false);
                 setShowLandingPage(false);
+                persistUser(uid, name, false);
                 navigate("/profile");
               }}
               onBackClick={() => {
@@ -114,7 +149,7 @@ function AppShell() {
         }
       />
 
-      {/* Profile (can navigate to /history using navigate("/history") inside ProfilePage) */}
+      {/* Profile */}
       <Route
         path="/profile"
         element={
@@ -123,6 +158,7 @@ function AppShell() {
               userId={userId}
               onProfileSaved={() => {
                 setProfileCompleted(true);
+                persistUser(userId, userName, true);
                 navigate("/wellness");
               }}
             />
@@ -130,7 +166,7 @@ function AppShell() {
         }
       />
 
-      {/* Wellness (can navigate to /history using navigate("/history") inside NavBar or buttons) */}
+      {/* Wellness */}
       <Route
         path="/wellness"
         element={
@@ -148,7 +184,7 @@ function AppShell() {
         }
       />
 
-      {/* History – reached from Profile or Wellness via navigate("/history") */}
+      {/* History */}
       <Route
         path="/history"
         element={
