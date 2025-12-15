@@ -188,6 +188,7 @@ function WellnessPage({ userId, userName, onLogout }) {
     }
   };
 
+
   // Load profile (+ history for health report)
   const handleLoadProfile = async () => {
     setShowProfile(true);
@@ -688,152 +689,164 @@ function WellnessPage({ userId, userName, onLogout }) {
                   </div>
                 )}
 
-                {/* Agent flow toggle */}
-                <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4">
-                  <button
-                    onClick={() => setShowAgentFlow((v) => !v)}
-                    className="w-full flex items-center justify-between gap-3 text-left"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">
-                        Agent collaboration
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        See how the system arrived at the plan
-                      </p>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {showAgentFlow ? "Hide" : "Show"}
-                    </div>
-                  </button>
-
-                  {showAgentFlow && (
-                    <div className="mt-4 relative">
-                      {agentLogs.length === 0 ? (
-                        <p className="text-sm text-gray-500">
-                          Generate a plan to see agent collaboration
+                {/* Agent flow toggle – hide while streaming */}
+                {!streamAnswer && (
+                  <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4">
+                    <button
+                      onClick={() => setShowAgentFlow((v) => !v)}
+                      className="w-full flex items-center justify-between gap-3 text-left"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          Agent collaboration
                         </p>
-                      ) : (
-                        <div className="relative">
-                          {/* Vertical connecting line */}
-                          <div className="absolute left-3 top-8 bottom-8 w-0.5 bg-emerald-200" />
+                        <p className="text-xs text-gray-500">
+                          See how the system arrived at the plan
+                        </p>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {showAgentFlow ? "Hide" : "Show"}
+                      </div>
+                    </button>
 
-                          {agentLogs.map((log, i) => (
-                            <div
-                              key={i}
-                              className="relative mb-6 last:mb-0"
-                            >
-                              {/* Agent circle and header */}
-                              <div className="flex items-start gap-3">
-                                <div className="relative z-10 h-6 w-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
-                                  {i + 1}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="text-sm font-bold text-gray-900 mb-3">
-                                    {log.agent}
-                                  </h4>
+                    {showAgentFlow && (
+                      <div className="mt-4 relative">
+                        {agentLogs.length === 0 ? (
+                          <p className="text-sm text-gray-500">
+                            Generate a plan to see agent collaboration
+                          </p>
+                        ) : (
+                          <div className="relative">
+                            {/* Vertical connecting line */}
+                            <div className="absolute left-3 top-8 bottom-8 w-0.5 bg-emerald-200" />
 
-                                  {/* Agent output with subheading bullets */}
-                                  {log.output && (
-                                    <div className="text-sm text-gray-700 space-y-3">
-                                      {log.output
-                                        .split("\n")
-                                        .map((line, idx) => {
-                                          const isHeading =
-                                            line.trim().startsWith("**") &&
-                                            line.trim().endsWith("**");
+                            {agentLogs.map((log, i) => (
+                              <div
+                                key={i}
+                                className="relative mb-6 last:mb-0"
+                              >
+                                {/* Agent circle and header */}
+                                <div className="flex items-start gap-3">
+                                  <div className="relative z-10 h-6 w-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                    {i + 1}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="text-sm font-bold text-gray-900 mb-3">
+                                      {log.agent}
+                                    </h4>
 
-                                          if (isHeading) {
-                                            const headingText = line
-                                              .trim()
-                                              .replace(/\*\*/g, "");
+                                    {/* Agent output with subheading bullets */}
+                                    {log.output && (
+                                      <div className="text-sm text-gray-700 space-y-3">
+                                        {log.output
+                                          .split("\n")
+                                          .map((line, idx) => {
+                                            const isHeading =
+                                              line.trim().startsWith("**") &&
+                                              line.trim().endsWith("**");
+
+                                            if (isHeading) {
+                                              const headingText = line
+                                                .trim()
+                                                .replace(/\*\*/g, "");
+                                              return (
+                                                <div
+                                                  key={idx}
+                                                  className="flex items-start gap-2 mt-4"
+                                                >
+                                                  <div className="h-2 w-2 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0" />
+                                                  <p className="font-semibold text-gray-900">
+                                                    {headingText}
+                                                  </p>
+                                                </div>
+                                              );
+                                            }
+
+                                            if (line.trim()) {
+                                              return (
+                                                <p
+                                                  key={idx}
+                                                  className="ml-4"
+                                                >
+                                                  {line}
+                                                </p>
+                                              );
+                                            }
+
                                             return (
                                               <div
                                                 key={idx}
-                                                className="flex items-start gap-2 mt-4"
-                                              >
-                                                <div className="h-2 w-2 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0" />
-                                                <p className="font-semibold text-gray-900">
-                                                  {headingText}
-                                                </p>
-                                              </div>
+                                                className="h-2"
+                                              />
                                             );
-                                          }
-
-                                          if (line.trim()) {
-                                            return (
-                                              <p
-                                                key={idx}
-                                                className="ml-4"
-                                              >
-                                                {line}
-                                              </p>
-                                            );
-                                          }
-
-                                          return (
-                                            <div
-                                              key={idx}
-                                              className="h-2"
-                                            />
-                                          );
-                                        })}
-                                    </div>
-                                  )}
+                                          })}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+
+                {/* Results card */}
+
+                {/* Results card – hide while streaming */}
+              
+                {/* Results card – hide while streaming */}
+                {!streamAnswer && (
+                  <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Your wellness plan
+                      </h3>
+                      <span className="text-xs inline-flex items-center px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">
+                        {/* optional badge */}
+                      </span>
+                    </div>
+
+                    {/* Placeholder text – only before any plan exists */}
+                    {!summary && recommendations.length === 0 && (
+                      <p className="text-sm text-gray-500 mb-3">
+                        No recommendations yet — submit symptoms or stream to generate a plan.
+                      </p>
+                    )}
+
+                    {recommendations.length > 0 && (
+                      <div className="space-y-3 mb-6">
+                        <p className="text-sm font-semibold text-gray-900 mb-4">
+                          Key Recommendations:
+                        </p>
+                        <div className="space-y-2">
+                          {recommendations.map((r, idx) => (
+                            <div
+                              key={idx}
+                              className="flex gap-3 items-start"
+                            >
+                              <div className="flex-shrink-0 w-2 h-2 rounded-full bg-emerald-500 mt-2" />
+                              <p className="text-sm text-gray-700">{r}</p>
                             </div>
                           ))}
                         </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Results card */}
-                <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Your wellness plan
-                    </h3>
-                    <span className="text-xs inline-flex items-center px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">
-                      Ready
-                    </span>
-                  </div>
-
-                  {recommendations.length > 0 ? (
-                    <div className="space-y-3 mb-6">
-                      <p className="text-sm font-semibold text-gray-900 mb-4">
-                        Key Recommendations:
-                      </p>
-                      <div className="space-y-2">
-                        {recommendations.map((r, idx) => (
-                          <div
-                            key={idx}
-                            className="flex gap-3 items-start"
-                          >
-                            <div className="flex-shrink-0 w-2 h-2 rounded-full bg-emerald-500 mt-2" />
-                            <p className="text-sm text-gray-700">{r}</p>
-                          </div>
-                        ))}
                       </div>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500 mb-3">
-                      No recommendations yet — submit symptoms or stream to
-                      generate a plan.
-                    </p>
-                  )}
+                    )}
 
-                  {summary && (
-                    <div className="prose prose-sm max-w-none text-gray-800 prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:text-sm prose-ul:text-sm prose-li:text-sm">
-                      <ReactMarkdown>{summary}</ReactMarkdown>
-                    </div>
-                  )}
+                    {summary && (
+                      <div className="prose prose-sm max-w-none text-gray-800 prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:text-sm prose-ul:text-sm prose-li:text-sm">
+                        <ReactMarkdown>{summary}</ReactMarkdown>
+                      </div>
+                    )}
+                  </div>
+                )}
+                </section>
                 </div>
-              </section>
-            </div>
-          )}
+                )}
+
 
           {/* YouTube recommendations */}
           {summary && (
@@ -884,10 +897,25 @@ function WellnessPage({ userId, userName, onLogout }) {
               </form>
 
               {followUpAnswer && (
-                <div className="mt-4 prose prose-sm text-gray-800">
+              <div
+                className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm text-slate-800"
+                style={{
+                  lineHeight: 1.6,              // overall readability
+                  marginTop: "0.75rem",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.5rem",              // gap between consecutive blocks
+                  }}
+                >
                   <ReactMarkdown>{followUpAnswer}</ReactMarkdown>
                 </div>
-              )}
+              </div>
+            )}
+
             </section>
           )}
         </div>
