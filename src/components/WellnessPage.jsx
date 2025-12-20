@@ -43,6 +43,7 @@ function WellnessPage({ userId, userName, onLogout }) {
   const [thoughts, setThoughts] = useState([]);
   const [streamAnswer, setStreamAnswer] = useState("");
   const [streamLoading, setStreamLoading] = useState(false);
+  
 
   const resetOutputs = () => {
     setRecommendations([]);
@@ -56,6 +57,30 @@ function WellnessPage({ userId, userName, onLogout }) {
     setStreamAnswer("");
     setStreamLoading(false);
   };
+
+   const handleReportFileChange = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  setStatus("Reading medical report…");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const res = await axios.post(`${API_BASE_URL}/upload-report`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    const extracted = res.data?.text || "";
+    setReport(extracted);              // ← puts extracted text into state
+    setStatus("");
+  } catch (err) {
+    setStatus(
+      err.response?.data?.error || "Failed to read medical report."
+    );
+  }
+};
+             
 
   // Submit main symptoms -> backend (non-streaming)
   const handleSubmit = async (e) => {
@@ -71,7 +96,7 @@ function WellnessPage({ userId, userName, onLogout }) {
     try {
       const res = await axios.post(`${API_BASE_URL}/health-assist`, {
         symptoms,
-        medical_report: report,
+        medical_report: report || "", 
         user_id: userId,
       });
 
@@ -127,7 +152,7 @@ function WellnessPage({ userId, userName, onLogout }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           symptoms,
-          medical_report: report,
+          medical_report: report || "",
         }),
       });
 
@@ -615,10 +640,21 @@ function WellnessPage({ userId, userName, onLogout }) {
                     />
                   </div>
 
-                  <div>
-                    <label className="text-xs sm:text-sm font-medium text-gray-700">
-                      Medical report (optional)
-                    </label>
+
+
+                  {/* --------- UPDATED medical report block (optional) ---------- */}
+                <div>
+                  <label className="text-xs sm:text-sm font-medium text-gray-700">
+                    Medical report (optional)
+                  </label>
+
+                  {/* NEW: file upload, still optional */}
+                  <input
+                    type="file"
+                    accept=".pdf,image/*"
+                    onChange={handleReportFileChange}
+                    className="mt-2 block text-xs sm:text-sm text-gray-700"
+                  />
                     <textarea
                       rows={3}
                       value={report}
