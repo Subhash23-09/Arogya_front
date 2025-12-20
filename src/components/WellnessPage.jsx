@@ -213,6 +213,39 @@ function WellnessPage({ userId, userName, onLogout }) {
     }
   };
 
+    const handleDownloadReport = () => {
+    if (!summary && recommendations.length === 0) {
+      return; // nothing to download yet
+    }
+
+    let content = "";
+
+    if (recommendations.length > 0) {
+      content += "Key Recommendations:\n";
+      recommendations.forEach((r, idx) => {
+        content += `${idx + 1}. ${r}\n`;
+      });
+      content += "\n";
+    }
+
+    if (summary) {
+      content += "Wellness Plan\n\n";
+      content += summary;
+    }
+
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "arogya_wellness_report.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+
 
   // Load profile (+ history for health report)
   const handleLoadProfile = async () => {
@@ -838,13 +871,21 @@ function WellnessPage({ userId, userName, onLogout }) {
                 {!streamAnswer && (
                   <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Your wellness plan
-                      </h3>
-                      <span className="text-xs inline-flex items-center px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium">
-                        {/* optional badge */}
-                      </span>
-                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Your wellness plan
+                    </h3>
+
+                    {summary || recommendations.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={handleDownloadReport}
+                        className="text-xs sm:text-sm px-3 py-1.5 rounded-full border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition"
+                      >
+                        Download report
+                      </button>
+                    ) : null}
+                  </div>
+
 
                     {/* Placeholder text – only before any plan exists */}
                     {!summary && recommendations.length === 0 && (
